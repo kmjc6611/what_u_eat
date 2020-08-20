@@ -1,14 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+     <script src="popup.js"></script>
     <meta charset="UTF-8">
-    <title>hello</title>
+    <title>index</title>
 </head>
 <body>
+<div class="wrap">
+
+
     <div class="search">
         <div class="search_btn">
-            <input type="search" value="input food">
+            <input type="search" value="식품명을 입력해주세요." onFocus="this.value='';return true;">
+            <button type="button" value="검색" onclick="showPopup();">검색하기</button>
         </div>
     </div>
+    <div class="result">
+        <div class="result_info">
+            <table class="result_table">
+                <thead>
+                <tr id="result_info">
+                    <th>선택</th>
+                    <th>식품명</th>
+                    <th>g(그램)수</th>
+                    <th>칼로리</th>
+                    <th>탄수화물</th>
+                    <th>단백질</th>
+                    <th>지방</th>
+                    <th>시간</th>
+                    <th>비고</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr id="#1">
+                    <td><input type="checkbox" name="checkbox" value="check"></td>
+                    <td>밥</td>
+                    <td>1</td>
+                    <td>300</td>
+                    <td>20</td>
+                    <td>10</td>
+                    <td>400</td>
+                    <td>20:10</td>
+                    <td>맛있었다.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="button">
+            <button type="button" value="insert_info" name="btn">저장하기</button>
+            <button type="button" value="delete_info" name="btn">삭제하기</button>
+
+        </div>
+    </div>
+
+</div>
 </body>
 </html>
