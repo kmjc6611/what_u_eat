@@ -1,17 +1,14 @@
-from __future__ import print_function
-import json, urllib.request
+from flask import Flask, render_template, jsonify, request
 
-apikey = 'e2b7a94889b847808871'
+app = Flask(__name__)
 
-startRow = 1
-endRow = 10
+from pymongo import MongoClient
 
-url = 'http://openapi.foodsafetykorea.go.kr/api/e2b7a94889b847808871/I2790/json/' + str(startRow) + '/' + str(endRow)
+client = MongoClient('localhost', 27017)
+db = client.dbsparta
 
-data = urllib.request.urlopen(url).read()
-output = json.loads(data)
 
-name = output['I2790']['row'][0]['DESC_KOR']
-kcal = output['I2790']['row'][0]['NUTR_CONT1']
-
-print(name, kcal)
+## HTML 화면 보기
+@app.route('/')
+def homework():
+    return render_template('index.html')
