@@ -3,13 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>음식검색창</title>
+
+    <script>
+        function find_food() {
+            $.ajax({
+                type: "GET",
+                url: "/api/food",
+                data: {
+                    'name_food' :$('give_food').val
+                },
+                success: function (response) {
+
+                }
+            })
+        }
+
+    </script>
 </head>
 <body>
 <div class="title">
     <div class="food_result">
         <span>음식명 :</span>
-        <input type="search" value="식품명을 입력해주세요." onFocus="this.value='';return true;">
-        <button type="button" value="검색">검색하기</button>
+        <input id ="give_food" type="search" value="식품명을 입력해주세요." onFocus="this.value='';return true;">
+        <button type="button"  onclick="find_food()" value="검색">검색하기</button>
     </div>
 </div>
 <div class="list">

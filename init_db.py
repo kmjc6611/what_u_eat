@@ -10,7 +10,7 @@ db = client.dbproject
 apikey = 'e2b7a94889b847808871'
 
 startRow = 1
-endRow = 1000
+endRow = 100
 
 url = 'http://openapi.foodsafetykorea.go.kr/api/e2b7a94889b847808871/I2790/json/' + str(startRow) + '/' + str(endRow)
 
