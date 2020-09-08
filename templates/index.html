@@ -12,15 +12,10 @@
             crossorigin="anonymous"></script>
 
     <script>
-
-
         $(document).ready(function () {
             $("#checkBox1").empty();           //.empty()랑 같음
         });
 
-    </script>
-
-    <script>
         let selectedFood;
 
         function click_event() {
@@ -60,7 +55,7 @@
 
                 let temp_html = `
                             <tr>
-                               <td><input type="checkbox" onclick="selectFood('${name}','${kcal}','${carbo}','${pro}','${fat}','${company}')" id="${name}"/></td>
+                               <td><input type="checkbox" name="box_chk" onclick="selectFood('${name}','${kcal}','${carbo}','${pro}','${fat}','${company}')" id="${name}"/></td>
                                <td>${name}</td>
                                <td>${kcal}kcal</td>
                                <td>${carbo}g</td>
@@ -73,23 +68,30 @@
         }
 
         function selectFood(name, kcal, carbo, pro, fat, company) {
-            let isChecked = $('#' + name).is(':checked');
-            if (isChecked) {
-                selectedFood = {
-                    'name': name,
-                    'kcal': kcal,
-                    'carbo': carbo,
-                    'pro': pro,
-                    'fat': fat,
-                    'company': company,
+            const chk_obj = document.getElementsByName("box_chk");
+            const chk_leng = chk_obj.length;
+            for (i = 0; i < chk_leng; i++) {
+
+                let isChecked = $('#' + name).is(':checked');
+                if (isChecked) {
+                    selectedFood = {
+                        'name': name,
+                        'kcal': kcal,
+                        'carbo': carbo,
+                        'pro': pro,
+                        'fat': fat,
+                        'company': company,
+                    }
+                } else {
+                    selectedFood = null;
                 }
-            } else {
-                selectedFood = null;
             }
         }
 
         function select() {
-            let temp = `<tr>
+                let sum_kcal = $(`#sum_kcal`).val()+$(`kcal`)
+                console.log($(`kcal`))
+                let temp = `<tr>
                             <td><input type="checkbox" id="checkBox2"></td>
                             <td>${Object.values(selectedFood)[0]}</td>
                             <td>${Object.values(selectedFood)[1]}kcal</td>
@@ -97,9 +99,22 @@
                             <td>${Object.values(selectedFood)[3]}g</td>
                             <td>${Object.values(selectedFood)[4]}g</td>
                             <td>${Object.values(selectedFood)[5]}</td>
+                            <td><input type="date"></td>
+                            <td><input type="text"></td>
                          </tr>`
-            $(`#result-box`).append(temp)
+                $(`#result-box`).append(temp)
+
+
+            let sum_temp = `<tr>
+                                <td>${sum_kcal}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>`
+            $(`#sum-box`).append(sum_temp)
         }
+
+
     </script>
 
 </head>
@@ -184,21 +199,34 @@
     </thead>
     <tbody id="result-box">
     <tr>
-        <td><input type="checkbox" id="checkBox1"></td>
-        <td>불고기</td>
-        <td>200kcal</td>
-        <td>20g</td>
-        <td>10g</td>
-        <td>10g</td>
-        <td>명품이당</td>
-        <td>20.10.20</td>
-        <td>맛있당</td>
 
     </tr>
     </tbody>
 
 
 </table>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>총 칼로리</th>
+        <th>총 탄수화물</th>
+        <th>총 단백질</th>
+        <th>총 지방</th>
+    </tr>
+    </thead>
+    <tbody id="sum-box">
+    <tr>
+        <th id="sum_kcal"></th>
+        <th></th>
+        <th></th>
+        <th></th>
+    </tr>
+    </tbody>
+
+
+</table>
+
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
         integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
         crossorigin="anonymous"></script>
