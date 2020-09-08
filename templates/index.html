@@ -1,59 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <script src="popup.js"></script>
+
     <meta charset="UTF-8">
-    <title>index</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>뭘 먹었니?</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+
+    <script>
+
+
+        $(document).ready(function () {
+            $("#checkBox1").empty();           //.empty()랑 같음
+        });
+
+    </script>
+
+    <script>
+        let selectedFood;
+
+        function click_event() {
+            let value_get = $('#food_name').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/api/search",
+                data: {
+                    'value_get': value_get,        //app.py 중에 POST부분으로 넘어간다.
+                },
+                success: function (response) { // 성공하면
+
+                    if (response['result'] === 'success') {
+                        let search_results = response["search_result"]
+
+                        for (let i = 0; i < search_results.length; i++) {
+                            let result = search_results[i]
+
+                            let name = result['name']
+                            let kcal = result['kcal']
+                            let carbo = result['carbo']
+                            let pro = result['pro']
+                            let fat = result['fat']
+                            let company = result['company']
+
+                            makeNew(carbo, company, fat, kcal, name, pro)
+
+                        }
+
+                    }
+                }
+
+            })
+
+            function makeNew(carbo, company, fat, kcal, name, pro) {
+
+                let temp_html = `
+                            <tr>
+                               <td><input type="checkbox" onclick="selectFood('${name}','${kcal}','${carbo}','${pro}','${fat}','${company}')" id="${name}"/></td>
+                               <td>${name}</td>
+                               <td>${kcal}kcal</td>
+                               <td>${carbo}g</td>
+                               <td>${pro}g</td>
+                               <td>${fat}g</td>
+                               <td>${company}</td>
+                            </tr>`
+                $(`#search-box`).append(temp_html)
+            }
+        }
+
+        function selectFood(name, kcal, carbo, pro, fat, company) {
+            let isChecked = $('#' + name).is(':checked');
+            if (isChecked) {
+                selectedFood = {
+                    'name': name,
+                    'kcal': kcal,
+                    'carbo': carbo,
+                    'pro': pro,
+                    'fat': fat,
+                    'company': company,
+                }
+            } else {
+                selectedFood = null;
+            }
+        }
+
+        function select() {
+            let temp = `<tr>
+                            <td><input type="checkbox" id="checkBox2"></td>
+                            <td>${Object.values(selectedFood)[0]}</td>
+                            <td>${Object.values(selectedFood)[1]}kcal</td>
+                            <td>${Object.values(selectedFood)[2]}g</td>
+                            <td>${Object.values(selectedFood)[3]}g</td>
+                            <td>${Object.values(selectedFood)[4]}g</td>
+                            <td>${Object.values(selectedFood)[5]}</td>
+                         </tr>`
+            $(`#result-box`).append(temp)
+        }
+    </script>
+
 </head>
+
+
 <body>
-<div class="wrap">
 
+<button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#exampleModal"
+        data-whatever="@mdo">검색하러가기! ><
+</button>
 
-    <div class="search">
-        <div class="search_btn">
-            <input type="search" value="식품명을 입력해주세요." onFocus="this.value='';return true;">
-            <button type="button" value="검색" onclick="showPopup();">검색하기</button>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">오늘은 뭘 먹었을까?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <div class="input-group mb-3">
+                            <input id="food_name" type="text" class="form-control" placeholder="음식명을 입력하세요!"
+                                   aria-label="Recipient's username" aria-describedby="button-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+                                        onclick="click_event()">
+                                    클릭!
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">검색결과</label>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>이름</th>
+                                <th>kcal</th>
+                                <th>탄</th>
+                                <th>단</th>
+                                <th>지</th>
+                                <th>브랜드명</th>
+                            </tr>
+                            </thead>
+                            <tbody id="search-box">
+
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="select()">입력하기</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
         </div>
     </div>
-    <div class="result">
-        <div class="result_info">
-            <table class="result_table">
-                <thead>
-                <tr id="result_info">
-                    <th>선택</th>
-                    <th>식품명</th>
-                    <th>g(그램)수</th>
-                    <th>칼로리</th>
-                    <th>탄수화물</th>
-                    <th>단백질</th>
-                    <th>지방</th>
-                    <th>시간</th>
-                    <th>비고</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                <tr id="#1">
-                    <td><input type="checkbox" name="checkbox" value="check"></td>
-                    <td>밥</td>
-                    <td>1</td>
-                    <td>300</td>
-                    <td>20</td>
-                    <td>10</td>
-                    <td>400</td>
-                    <td>20:10</td>
-                    <td>맛있었다.</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="button">
-            <button type="button" value="insert_info" name="btn">저장하기</button>
-            <button type="button" value="delete_info" name="btn">삭제하기</button>
-
-        </div>
-    </div>
-
 </div>
+
+
+<button type="button" class="btn btn-outline-danger">삭제하기ㅠㅠ</button>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>삭제</th>
+        <th>이름</th>
+        <th>kcal</th>
+        <th>탄</th>
+        <th>단</th>
+        <th>지</th>
+        <th>브랜드명</th>
+        <th>날짜</th>
+        <th>비고</th>
+    </tr>
+    </thead>
+    <tbody id="result-box">
+    <tr>
+        <td><input type="checkbox" id="checkBox1"></td>
+        <td>불고기</td>
+        <td>200kcal</td>
+        <td>20g</td>
+        <td>10g</td>
+        <td>10g</td>
+        <td>명품이당</td>
+        <td>20.10.20</td>
+        <td>맛있당</td>
+
+    </tr>
+    </tbody>
+
+
+</table>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </body>
 </html>
+
+

@@ -4,8 +4,7 @@ import json, urllib.request
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
-db = client.dbproject
-
+db = client.myproject
 
 apikey = 'e2b7a94889b847808871'
 
@@ -18,7 +17,6 @@ data = urllib.request.urlopen(url).read()
 output = json.loads(data)
 foods = output['I2790']['row']
 for food in foods:
-
     name = food['DESC_KOR']
     company = food['MAKER_NAME']
     kcal = food['NUTR_CONT1']
@@ -28,11 +26,11 @@ for food in foods:
 
     # print(name, company, kcal, carbo, pro, fat)
     doc = {
-        'name' : name,
-        'company' : company,
-        'kcal' : kcal,
-        'carbo' : carbo,
-        'pro' : pro,
-        'fat' : fat
+        'name': name,
+        'company': company,
+        'kcal': kcal,
+        'carbo': carbo,
+        'pro': pro,
+        'fat': fat
     }
     db.food.insert_one(doc)
