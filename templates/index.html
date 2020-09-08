@@ -7,123 +7,12 @@
     <title>뭘 먹었니?</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
           integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-            crossorigin="anonymous"></script>
-
-    <script>
-        $(document).ready(function () {
-            $("#checkBox1").empty();           //.empty()랑 같음
-        });
-
-        let selectedFood;
-
-        function click_event() {
-            let value_get = $('#food_name').val();
-
-            $.ajax({
-                type: "POST",
-                url: "/api/search",
-                data: {
-                    'value_get': value_get,        //app.py 중에 POST부분으로 넘어간다.
-                },
-                success: function (response) { // 성공하면
-
-                    if (response['result'] === 'success') {
-                        let search_results = response["search_result"]
-
-                        for (let i = 0; i < search_results.length; i++) {
-                            let result = search_results[i]
-
-                            let name = result['name']
-                            let kcal = result['kcal']
-                            let carbo = result['carbo']
-                            let pro = result['pro']
-                            let fat = result['fat']
-                            let company = result['company']
-
-                            makeNew(carbo, company, fat, kcal, name, pro)
-
-                        }
-
-                    }
-                }
-
-            })
-
-            function makeNew(carbo, company, fat, kcal, name, pro) {
-
-                let temp_html = `
-                            <tr>
-                               <td><input type="checkbox" name="box_chk" onclick="selectFood('${name}','${kcal}','${carbo}','${pro}','${fat}','${company}')" id="${name}"/></td>
-                               <td>${name}</td>
-                               <td>${kcal}kcal</td>
-                               <td>${carbo}g</td>
-                               <td>${pro}g</td>
-                               <td>${fat}g</td>
-                               <td>${company}</td>
-                            </tr>`
-                $(`#search-box`).append(temp_html)
-            }
-        }
-
-        function selectFood(name, kcal, carbo, pro, fat, company) {
-            const chk_obj = document.getElementsByName("box_chk");
-            const chk_leng = chk_obj.length;
-            for (i = 0; i < chk_leng; i++) {
-
-                let isChecked = $('#' + name).is(':checked');
-                if (isChecked) {
-                    selectedFood = {
-                        'name': name,
-                        'kcal': kcal,
-                        'carbo': carbo,
-                        'pro': pro,
-                        'fat': fat,
-                        'company': company,
-                    }
-                } else {
-                    selectedFood = null;
-                }
-            }
-        }
-
-        function select() {
-                let sum_kcal = $(`#sum_kcal`).val()+$(`kcal`)
-                console.log($(`kcal`))
-                let temp = `<tr>
-                            <td><input type="checkbox" id="checkBox2"></td>
-                            <td>${Object.values(selectedFood)[0]}</td>
-                            <td>${Object.values(selectedFood)[1]}kcal</td>
-                            <td>${Object.values(selectedFood)[2]}g</td>
-                            <td>${Object.values(selectedFood)[3]}g</td>
-                            <td>${Object.values(selectedFood)[4]}g</td>
-                            <td>${Object.values(selectedFood)[5]}</td>
-                            <td><input type="date"></td>
-                            <td><input type="text"></td>
-                         </tr>`
-                $(`#result-box`).append(temp)
-
-
-            let sum_temp = `<tr>
-                                <td>${sum_kcal}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>`
-            $(`#sum-box`).append(sum_temp)
-        }
-
-
-    </script>
-
 </head>
 
 
 <body>
 
-<button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#exampleModal"
-        data-whatever="@mdo">검색하러가기! ><
+<button type="button" class="btn btn-outline-success" onclick="showSearchModal()">검색하러가기! ><
 </button>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -217,7 +106,7 @@
     </thead>
     <tbody id="sum-box">
     <tr>
-        <th id="sum_kcal"></th>
+        <th id="sum_kcal">0</th>
         <th></th>
         <th></th>
         <th></th>
@@ -227,14 +116,131 @@
 
 </table>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
         integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
         crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#checkBox1").empty();           //.empty()랑 같음
+    });
+
+    // 모달창에서 선택한 음식 배열
+    let selectedFoodList = [];
+
+    function showSearchModal() {
+        // 초기화
+        $('#food_name').val('');
+        $(`#search-box`).empty();
+
+        // show modal
+        $('#exampleModal').modal('show');
+    }
+
+    function click_event() {
+        let value_get = $('#food_name').val();
+
+        $.ajax({
+            type: "POST",
+            url: "/api/search",
+            data: {
+                'value_get': value_get,        //app.py 중에 POST부분으로 넘어간다.
+            },
+            success: function (response) { // 성공하면
+
+                if (response['result'] === 'success') {
+                    let search_results = response["search_result"]
+
+                    for (let i = 0; i < search_results.length; i++) {
+                        let result = search_results[i]
+
+                        let name = result['name']
+                        let kcal = result['kcal']
+                        let carbo = result['carbo']
+                        let pro = result['pro']
+                        let fat = result['fat']
+                        let company = result['company']
+
+                        makeNew(carbo, company, fat, kcal, name, pro)
+
+                    }
+
+                }
+            }
+
+        })
+
+        function makeNew(carbo, company, fat, kcal, name, pro) {
+
+            let temp_html = `
+                            <tr>
+                               <td><input type="checkbox" name="box_chk" onclick="selectFood('${name}','${kcal}','${carbo}','${pro}','${fat}','${company}')" id="${name}"/></td>
+                               <td>${name}</td>
+                               <td>${kcal}kcal</td>
+                               <td>${carbo}g</td>
+                               <td>${pro}g</td>
+                               <td>${fat}g</td>
+                               <td>${company}</td>
+                            </tr>`
+            $(`#search-box`).append(temp_html)
+        }
+    }
+
+    function selectFood(name, kcal, carbo, pro, fat, company) {
+        const chk_obj = document.getElementsByName("box_chk");
+        const chk_leng = chk_obj.length;
+        let isChecked = $('#' + name).is(':checked');
+        let selectedFood = {
+            'name': name,
+            'kcal': kcal,
+            'carbo': carbo,
+            'pro': pro,
+            'fat': fat,
+            'company': company,
+        };
+        if (isChecked) {
+            // selectedFoodList에 선택한 음식 추가
+            selectedFoodList.push(selectedFood);
+            console.log(selectedFoodList);
+        } else {
+            // selectedFoodList에서 선택한 음식을 제거
+            for (let i = 0; i < selectedFoodList.length; i++) {
+                if (selectedFoodList[i]['name'] === selectedFood['name']) {
+                    selectedFoodList.splice(i, 1);
+                    break;
+                }
+            }
+            console.log(selectedFoodList);
+        }
+    }
+
+    function select() {
+        for (let i = 0; i < selectedFoodList.length; i++) {
+            let selectedFood = Object.values(selectedFoodList[i]);
+            let temp = `<tr>
+                        <td><input type="checkbox" id="checkBox2"></td>
+                        <td>${selectedFood[0]}</td>
+                        <td>${selectedFood[1]}kcal</td>
+                        <td>${selectedFood[2]}g</td>
+                        <td>${selectedFood[3]}g</td>
+                        <td>${selectedFood[4]}g</td>
+                        <td>${selectedFood[5]}</td>
+                        <td><input type="date"></td>
+                        <td><input type="text"></td>
+                     </tr>`
+            $(`#result-box`).append(temp)
+
+            let sum_kcal = parseFloat($(`#sum_kcal`).text());
+            let selectedFoodKcal = parseFloat(selectedFood[1]);
+            $('#sum_kcal').text(sum_kcal + selectedFoodKcal);
+        }
+    }
+
+
+</script>
 </body>
 </html>
-
-

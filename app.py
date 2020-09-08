@@ -23,9 +23,8 @@ def show_foods():
 @app.route('/api/search', methods=['POST'])
 def find_from_db():
     value_received = request.form['value_get']
-    search_result = list(db.food.find({'name': value_received}, {'_id': False}))
+    search_result = list(db.food.find({'name': {'$regex': value_received}}, {'_id': False}))
     return jsonify({'result': 'success', 'search_result': search_result})
-
 
 
 if __name__ == '__main__':
