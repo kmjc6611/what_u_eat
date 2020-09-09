@@ -70,9 +70,9 @@
 </div>
 
 
-<button type="button" class="btn btn-outline-danger">삭제하기ㅠㅠ</button>
+<button type="button" class="btn btn-outline-danger" onclick="deleteFunc()">삭제하기ㅠㅠ</button>
 
-<table class="table">
+<table class="table" id="result_table">
     <thead>
     <tr>
         <th>삭제</th>
@@ -106,10 +106,10 @@
     </thead>
     <tbody id="sum-box">
     <tr>
-        <th id="sum_kcal">0</th>
-        <th></th>
-        <th></th>
-        <th></th>
+        <th id="sum_kcal">0kcal</th>
+        <th>0g</th>
+        <th>0g</th>
+        <th>0g</th>
     </tr>
     </tbody>
 
@@ -129,11 +129,11 @@
         $("#checkBox1").empty();           //.empty()랑 같음
     });
 
-    // 모달창에서 선택한 음식 배열
+    // 모달창에서 선택한 음식을 담는 배열
     let selectedFoodList = [];
 
     function showSearchModal() {
-        // 초기화
+        // 모달 창 초기화
         $('#food_name').val('');
         $(`#search-box`).empty();
 
@@ -141,8 +141,8 @@
         $('#exampleModal').modal('show');
     }
 
-    function click_event() {
-        let value_get = $('#food_name').val();
+    function click_event() {                      //모달창에서 클릭 버튼을 누르면 발생하는 이벤트
+        let value_get = $('#food_name').val();     //검색창에 입력한 값을 변수에 넣는다.
 
         $.ajax({
             type: "POST",
@@ -150,10 +150,10 @@
             data: {
                 'value_get': value_get,        //app.py 중에 POST부분으로 넘어간다.
             },
-            success: function (response) { // 성공하면
+            success: function (response) { // app.py에서 통신이 성공되어 함수 안으로 들어오게 되면
 
                 if (response['result'] === 'success') {
-                    let search_results = response["search_result"]
+                    let search_results = response["search_result"]  //디비에서 가져온 결과값(search_result)을 search_results에 넣고
 
                     for (let i = 0; i < search_results.length; i++) {
                         let result = search_results[i]
@@ -165,20 +165,9 @@
                         let fat = result['fat']
                         let company = result['company']
 
-                        makeNew(carbo, company, fat, kcal, name, pro)
-
-                    }
-
-                }
-            }
-
-        })
-
-        function makeNew(carbo, company, fat, kcal, name, pro) {
-
-            let temp_html = `
+                        let temp_html = `
                             <tr>
-                               <td><input type="checkbox" name="box_chk" onclick="selectFood('${name}','${kcal}','${carbo}','${pro}','${fat}','${company}')" id="${name}"/></td>
+                               <td><input type="checkbox" onclick="selectFood('${name}','${kcal}','${carbo}','${pro}','${fat}','${company}')" id="${name}"/></td>
                                <td>${name}</td>
                                <td>${kcal}kcal</td>
                                <td>${carbo}g</td>
@@ -186,14 +175,18 @@
                                <td>${fat}g</td>
                                <td>${company}</td>
                             </tr>`
-            $(`#search-box`).append(temp_html)
-        }
+                        $(`#search-box`).append(temp_html)
+                    }
+                }
+            }
+
+        })
+
+
     }
 
-    function selectFood(name, kcal, carbo, pro, fat, company) {
-        const chk_obj = document.getElementsByName("box_chk");
-        const chk_leng = chk_obj.length;
-        let isChecked = $('#' + name).is(':checked');
+    function selectFood(name, kcal, carbo, pro, fat, company) {         //모달창에서 checkbox에 체크를 누를 때 발생하는 이벤트
+        let isChecked = $('#' + name).is(':checked');   //체크가 되어있으면 true, 아니면 false를 반환
         let selectedFood = {
             'name': name,
             'kcal': kcal,
@@ -202,25 +195,24 @@
             'fat': fat,
             'company': company,
         };
-        if (isChecked) {
+        if (isChecked) {                        //체크가 되어 있으면
             // selectedFoodList에 선택한 음식 추가
-            selectedFoodList.push(selectedFood);
-            console.log(selectedFoodList);
+            selectedFoodList.push(selectedFood);    //selectedFood를 List라는 배열 변수에 넣는다. 따라서 여러개일 경우일 지라도 체크가 되어 있다면 push로 넣어지게 된다.
+            console.log(selectedFoodList)
         } else {
             // selectedFoodList에서 선택한 음식을 제거
             for (let i = 0; i < selectedFoodList.length; i++) {
-                if (selectedFoodList[i]['name'] === selectedFood['name']) {
-                    selectedFoodList.splice(i, 1);
+                if (selectedFoodList[i]['name'] === selectedFood['name']) {     //체크박스에 선택된 이름이랑 배열중에 같은 이름이 있으면
+                    selectedFoodList.splice(i, 1);      //삭제한다. (문제점 : 같은 이름인 음식이 있을 경우 오류상황 발생)
                     break;
                 }
             }
-            console.log(selectedFoodList);
         }
     }
 
-    function select() {
+    function select() {                                     //모달창에서 입력하기 버튼을 누르면 발생되는 이벤트
         for (let i = 0; i < selectedFoodList.length; i++) {
-            let selectedFood = Object.values(selectedFoodList[i]);
+            let selectedFood = Object.values(selectedFoodList[i]);  //리스트의 요소들을 모두 가져와서 붙인다.
             let temp = `<tr>
                         <td><input type="checkbox" id="checkBox2"></td>
                         <td>${selectedFood[0]}</td>
@@ -234,10 +226,26 @@
                      </tr>`
             $(`#result-box`).append(temp)
 
-            let sum_kcal = parseFloat($(`#sum_kcal`).text());
-            let selectedFoodKcal = parseFloat(selectedFood[1]);
-            $('#sum_kcal').text(sum_kcal + selectedFoodKcal);
+            let sum_kcal = parseFloat($(`#sum_kcal`).text());   //메인창에 있는 총 칼로리 정보를 가져온다. (가져올때 형변환을 시켜줘야한다.)
+            let selectedFoodKcal = parseFloat(selectedFood[1]);     //Food 정보중에 kcal([1])정보를 가져온다.)
+            $('#sum_kcal').text(sum_kcal + selectedFoodKcal + 'kcal');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+
         }
+        selectedFoodList = [];    //다음 사용을 위해 배열 초기화
+    }
+
+
+    function deleteFunc() {
+        let body = document.getElementById('result-box');
+        let chkbox = document.querySelectorAll('#result_table #checkBox2');
+        for (let i in chkbox) {
+            if (chkbox[i].nodeType == 1 && chkbox[i].checked == true) {
+                body.removeChild(chkbox[i].parentNode.parentNode);
+            }
+        }
+        let sum_kcal = parseFloat($(`#sum_kcal`).text());   //메인창에 있는 총 칼로리 정보를 가져온다. (가져올때 형변환을 시켜줘야한다.)
+        let selectedFoodKcal = parseFloat(????);     //체크된 음식의 정보중에 kcal([1])정보를 가져온다.)
+        $('#sum_kcal').text(sum_kcal - selectedFoodKcal + 'kcal');  // 총 칼로리에서 선택된 음식의 칼로리들의 합을 빼고 그 값을 총 칼로리에 넣는다.
     }
 
 
