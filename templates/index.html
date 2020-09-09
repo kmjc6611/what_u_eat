@@ -12,8 +12,8 @@
 
 <body>
 
-<button type="button" class="btn btn-outline-success" onclick="showSearchModal()">검색하러가기! ><
-</button>
+<button type="button" class="btn btn-outline-success" onclick="showSearchModal()">검색하러가기! ><</button>
+<button type="button" class="btn btn-outline-danger" onclick="deleteFunc()">삭제하기ㅠㅠ</button>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -70,8 +70,6 @@
 </div>
 
 
-<button type="button" class="btn btn-outline-danger" onclick="deleteFunc()">삭제하기ㅠㅠ</button>
-
 <table class="table" id="result_table">
     <thead>
     <tr>
@@ -83,7 +81,7 @@
         <th>지</th>
         <th>브랜드명</th>
         <th>날짜</th>
-        <th>비고</th>
+        <th>수량</th>
     </tr>
     </thead>
     <tbody id="result-box">
@@ -95,7 +93,7 @@
 
 </table>
 
-<table class="table">
+<table class="table" id="sum_table">
     <thead>
     <tr>
         <th>총 칼로리</th>
@@ -107,9 +105,9 @@
     <tbody id="sum-box">
     <tr>
         <th id="sum_kcal">0kcal</th>
-        <th>0g</th>
-        <th>0g</th>
-        <th>0g</th>
+        <th id="sum_carbo">0g</th>
+        <th id="sum_pro">0g</th>
+        <th id="sum_fat">0g</th>
     </tr>
     </tbody>
 
@@ -127,16 +125,24 @@
 <script>
     $(document).ready(function () {
         $("#checkBox1").empty();           //.empty()랑 같음
+        $('#exampleModal').on('shown.bs.modal', function () {
+            initModal();
+        })
+        $('#exampleModal').on('hidden.bs.modal', function () {
+            initModal();
+        })
     });
 
-    // 모달창에서 선택한 음식을 담는 배열
+    // 선택한 음식을 담는 배열
     let selectedFoodList = [];
 
-    function showSearchModal() {
+    function initModal() {
         // 모달 창 초기화
         $('#food_name').val('');
         $(`#search-box`).empty();
+    }
 
+    function showSearchModal() {
         // show modal
         $('#exampleModal').modal('show');
     }
@@ -155,15 +161,32 @@
                 if (response['result'] === 'success') {
                     let search_results = response["search_result"]  //디비에서 가져온 결과값(search_result)을 search_results에 넣고
 
+                    // 체크 안된 tr 삭제
+                    $('#search-box input:checkbox:not(:checked)').each(function () {
+                        $(this).closest('tr').empty();
+                    });
+
+                    // 현재 선택 된 목록 가져오기
+                    let selectedFoodId = [];
+                    $('#search-box input:checked').each(function () {
+                        selectedFoodId.push($(this).attr('id'));
+                    });
+
+                    console.log(selectedFoodId);
+
                     for (let i = 0; i < search_results.length; i++) {
                         let result = search_results[i]
 
-                        let name = result['name']
-                        let kcal = result['kcal']
-                        let carbo = result['carbo']
-                        let pro = result['pro']
-                        let fat = result['fat']
-                        let company = result['company']
+                        let name = result['name'];
+                        if (selectedFoodId.indexOf(name) !== -1) {
+                            console.log(name, '은 이미 선택했습니다.');
+                            continue;
+                        }
+                        let kcal = result['kcal'];
+                        let carbo = result['carbo'];
+                        let pro = result['pro'];
+                        let fat = result['fat'];
+                        let company = result['company'];
 
                         let temp_html = `
                             <tr>
@@ -210,25 +233,45 @@
         }
     }
 
+    function numChanged(num, name, kcal) {
+        console.log(num, kcal);
+        kcal = kcal * num
+        
+    }
+
+
     function select() {                                     //모달창에서 입력하기 버튼을 누르면 발생되는 이벤트
         for (let i = 0; i < selectedFoodList.length; i++) {
             let selectedFood = Object.values(selectedFoodList[i]);  //리스트의 요소들을 모두 가져와서 붙인다.
             let temp = `<tr>
-                        <td><input type="checkbox" id="checkBox2"></td>
-                        <td>${selectedFood[0]}</td>
-                        <td>${selectedFood[1]}kcal</td>
-                        <td>${selectedFood[2]}g</td>
-                        <td>${selectedFood[3]}g</td>
-                        <td>${selectedFood[4]}g</td>
-                        <td>${selectedFood[5]}</td>
-                        <td><input type="date"></td>
-                        <td><input type="text"></td>
-                     </tr>`
+                            <td><input type="checkbox" id="${selectedFood[0]}" onclick="selectFood('${selectedFood[0]}', '${selectedFood[1]}','${selectedFood[2]}','${selectedFood[3]}','${selectedFood[4]}')"></td>
+                            <td>${selectedFood[0]}</td>
+                            <td>${selectedFood[1]}kcal</td>
+                            <td>${selectedFood[2]}g</td>
+                            <td>${selectedFood[3]}g</td>
+                            <td>${selectedFood[4]}g</td>
+                            <td>${selectedFood[5]}</td>
+                            <td><input type="date"></td>
+                            <td><input type="number" value="1" onchange="numChanged(this.value, ${selectedFood[0]},${selectedFood[1]})"></td>
+                         </tr>`
             $(`#result-box`).append(temp)
 
             let sum_kcal = parseFloat($(`#sum_kcal`).text());   //메인창에 있는 총 칼로리 정보를 가져온다. (가져올때 형변환을 시켜줘야한다.)
             let selectedFoodKcal = parseFloat(selectedFood[1]);     //Food 정보중에 kcal([1])정보를 가져온다.)
-            $('#sum_kcal').text(sum_kcal + selectedFoodKcal + 'kcal');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+            $('#sum_kcal').text((sum_kcal + selectedFoodKcal).toFixed(1) + 'kcal');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+
+            let sum_carbo = parseFloat($(`#sum_carbo`).text());
+            let selectedFoodCarbo = parseFloat(selectedFood[2]);
+            $('#sum_carbo').text((sum_carbo + selectedFoodCarbo).toFixed(1) + 'g');
+
+            let sum_pro = parseFloat($(`#sum_pro`).text());
+            let selectedFoodPro = parseFloat(selectedFood[3]);
+            $('#sum_pro').text((sum_pro + selectedFoodPro).toFixed(1) + 'g');
+
+            let sum_fat = parseFloat($(`#sum_fat`).text());
+            let selectedFoodFat = parseFloat(selectedFood[4]);
+            $('#sum_fat').text((sum_fat + selectedFoodFat).toFixed(1) + 'g');
+
 
         }
         selectedFoodList = [];    //다음 사용을 위해 배열 초기화
@@ -236,16 +279,31 @@
 
 
     function deleteFunc() {
-        let body = document.getElementById('result-box');
-        let chkbox = document.querySelectorAll('#result_table #checkBox2');
-        for (let i in chkbox) {
-            if (chkbox[i].nodeType == 1 && chkbox[i].checked == true) {
-                body.removeChild(chkbox[i].parentNode.parentNode);
-            }
+        for (let i = 0; i < selectedFoodList.length; i++) {
+            let selectedFood = Object.values(selectedFoodList[i]);  //리스트의 요소들을 모두 가져와서 붙인다.
+            console.log(Object.values(selectedFoodList[i]))
+            let sum_kcal = parseFloat($(`#sum_kcal`).text());
+            let selectedFoodKcal = parseFloat(selectedFood[1]);
+            $('#sum_kcal').text((sum_kcal - selectedFoodKcal).toFixed(1) + 'kcal');
+
+            let sum_carbo = parseFloat($(`#sum_carbo`).text());
+            let selectedFoodCarbo = parseFloat(selectedFood[2]);
+            $('#sum_carbo').text((sum_carbo - selectedFoodCarbo).toFixed(1) + 'g');
+
+            let sum_pro = parseFloat($(`#sum_pro`).text());
+            let selectedFoodPro = parseFloat(selectedFood[3]);
+            $('#sum_pro').text((sum_pro - selectedFoodPro).toFixed(1) + 'g');
+
+            let sum_fat = parseFloat($(`#sum_fat`).text());
+            let selectedFoodFat = parseFloat(selectedFood[4]);
+            $('#sum_fat').text((sum_fat - selectedFoodFat).toFixed(1) + 'g');
         }
-        let sum_kcal = parseFloat($(`#sum_kcal`).text());   //메인창에 있는 총 칼로리 정보를 가져온다. (가져올때 형변환을 시켜줘야한다.)
-        let selectedFoodKcal = parseFloat(????);     //체크된 음식의 정보중에 kcal([1])정보를 가져온다.)
-        $('#sum_kcal').text(sum_kcal - selectedFoodKcal + 'kcal');  // 총 칼로리에서 선택된 음식의 칼로리들의 합을 빼고 그 값을 총 칼로리에 넣는다.
+        selectedFoodList = [];
+
+        // 체크된 항목들 html에서 삭제
+        $('#result-box input:checked').each(function () {
+            $(this).closest('tr').empty();
+        });
     }
 
 
