@@ -172,14 +172,12 @@
                         selectedFoodId.push($(this).attr('id'));
                     });
 
-                    console.log(selectedFoodId);
 
                     for (let i = 0; i < search_results.length; i++) {
                         let result = search_results[i]
 
                         let name = result['name'];
                         if (selectedFoodId.indexOf(name) !== -1) {
-                            console.log(name, '은 이미 선택했습니다.');
                             continue;
                         }
                         let kcal = result['kcal'];
@@ -234,9 +232,8 @@
     }
 
     function numChanged(num, name, kcal) {
-        console.log(num, kcal);
         kcal = kcal * num
-        
+        console.log(document.getElementById(name))
     }
 
 
@@ -281,7 +278,7 @@
     function deleteFunc() {
         for (let i = 0; i < selectedFoodList.length; i++) {
             let selectedFood = Object.values(selectedFoodList[i]);  //리스트의 요소들을 모두 가져와서 붙인다.
-            console.log(Object.values(selectedFoodList[i]))
+
             let sum_kcal = parseFloat($(`#sum_kcal`).text());
             let selectedFoodKcal = parseFloat(selectedFood[1]);
             $('#sum_kcal').text((sum_kcal - selectedFoodKcal).toFixed(1) + 'kcal');
