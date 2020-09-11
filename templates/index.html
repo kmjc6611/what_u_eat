@@ -136,6 +136,9 @@
     // 선택한 음식을 담는 배열
     let selectedFoodList = [];
 
+    // 선택한 음식의 칼로리양을 담는 배열
+    let selectedFoodKcal = []
+
     function initModal() {
         // 모달 창 초기화
         $('#food_name').val('');
@@ -231,9 +234,67 @@
         }
     }
 
-    function numChanged(num, name, kcal) {
-        kcal = kcal * num
-        console.log(document.getElementById(name))
+    function numChanged(num, name, kcal, carbo, pro, fat) {
+
+        //1. 입력되어 있는 현재 kcal를 받아온다.
+        let kcalElement = $(`#${name}`).parent().siblings()[1];
+        let kcalInfo = parseFloat(($(kcalElement).text()))
+        // 2. 수량 * kcal 한 값을 저장한다.
+        let changedKcal = kcal * num
+        changedKcal = Math.round(changedKcal)
+        // 3. 바뀐 값과 원래 값을 빼서 변화량을 구한다.
+        let rateOfChangeKcal = changedKcal - kcalInfo
+        // 4. 총 칼로리에 값을 더한다.
+        let sum_kcal = parseFloat($(`#sum_kcal`).text());
+
+        $(kcalElement).text(`${changedKcal}kcal`);
+        $('#sum_kcal').text((Math.round(sum_kcal + rateOfChangeKcal)) + 'kcal');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+
+
+        //1. 입력되어 있는 현재 kcal를 받아온다.
+        let carboElement = $(`#${name}`).parent().siblings()[2];
+        let carboInfo = parseFloat(($(carboElement).text()));
+        // 2. 수량 * kcal 한 값을 저장한다.
+        let changedCarbo = carbo * num;
+        changedCarbo = Math.round(changedCarbo);
+        // 3. 바뀐 값과 원래 값을 빼서 변화량을 구한다.
+        let rateOfChangeCarbo = changedCarbo - carboInfo;
+        // 4. 총 칼로리에 값을 더한다.
+        let sum_carbo = parseFloat($(`#sum_carbo`).text());
+
+        $(carboElement).text(`${changedCarbo}g`);
+        $('#sum_carbo').text((Math.round(sum_carbo + rateOfChangeCarbo)) + 'g');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+
+
+        //1. 입력되어 있는 현재 kcal를 받아온다.
+        let proElement = $(`#${name}`).parent().siblings()[3];
+        let proInfo = parseFloat(($(proElement).text()))
+        // 2. 수량 * kcal 한 값을 저장한다.
+        let changedPro = pro * num
+        changedPro = Math.round(changedPro)
+        // 3. 바뀐 값과 원래 값을 빼서 변화량을 구한다.
+        let rateOfChangePro = changedPro - proInfo
+        // 4. 총 칼로리에 값을 더한다.
+        let sum_pro = parseFloat($(`#sum_pro`).text());
+
+        $(proElement).text(`${changedPro}g`);
+        $('#sum_pro').text((Math.round(sum_pro + rateOfChangePro)) + 'g');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+
+
+        //1. 입력되어 있는 현재 kcal를 받아온다.
+        let fatElement = $(`#${name}`).parent().siblings()[4];
+        let fatInfo = parseFloat(($(fatElement).text()))
+        // 2. 수량 * kcal 한 값을 저장한다.
+        let changedFat = fat * num
+        changedFat = Math.round(changedFat)
+        // 3. 바뀐 값과 원래 값을 빼서 변화량을 구한다.
+        let rateOfChangeFat = changedFat - fatInfo
+        // 4. 총 칼로리에 값을 더한다.
+        let sum_fat = parseFloat($(`#sum_fat`).text());
+
+        $(fatElement).text(`${changedFat}g`);
+        $('#sum_fat').text((Math.round(sum_fat + rateOfChangeFat)) + 'g');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+
     }
 
 
@@ -249,25 +310,25 @@
                             <td>${selectedFood[4]}g</td>
                             <td>${selectedFood[5]}</td>
                             <td><input type="date"></td>
-                            <td><input type="number" value="1" onchange="numChanged(this.value, ${selectedFood[0]},${selectedFood[1]})"></td>
+                            <td><input type="number" value="1" onchange="numChanged(this.value, '${selectedFood[0]}' ,${selectedFood[1]}, '${selectedFood[2]}', '${selectedFood[3]}', '${selectedFood[4]}')"></td>
                          </tr>`
             $(`#result-box`).append(temp)
 
             let sum_kcal = parseFloat($(`#sum_kcal`).text());   //메인창에 있는 총 칼로리 정보를 가져온다. (가져올때 형변환을 시켜줘야한다.)
             let selectedFoodKcal = parseFloat(selectedFood[1]);     //Food 정보중에 kcal([1])정보를 가져온다.)
-            $('#sum_kcal').text((sum_kcal + selectedFoodKcal).toFixed(1) + 'kcal');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
+            $('#sum_kcal').text((Math.round(sum_kcal + selectedFoodKcal)) + 'kcal');  // 그 둘을 더하고 그 값을 총 칼로리에 넣는다.
 
             let sum_carbo = parseFloat($(`#sum_carbo`).text());
             let selectedFoodCarbo = parseFloat(selectedFood[2]);
-            $('#sum_carbo').text((sum_carbo + selectedFoodCarbo).toFixed(1) + 'g');
+            $('#sum_carbo').text((Math.round(sum_carbo + selectedFoodCarbo)) + 'g');
 
             let sum_pro = parseFloat($(`#sum_pro`).text());
             let selectedFoodPro = parseFloat(selectedFood[3]);
-            $('#sum_pro').text((sum_pro + selectedFoodPro).toFixed(1) + 'g');
+            $('#sum_pro').text((Math.round(sum_pro + selectedFoodPro)) + 'g');
 
             let sum_fat = parseFloat($(`#sum_fat`).text());
             let selectedFoodFat = parseFloat(selectedFood[4]);
-            $('#sum_fat').text((sum_fat + selectedFoodFat).toFixed(1) + 'g');
+            $('#sum_fat').text((Math.round(sum_fat + selectedFoodFat)) + 'g');
 
 
         }
@@ -281,19 +342,19 @@
 
             let sum_kcal = parseFloat($(`#sum_kcal`).text());
             let selectedFoodKcal = parseFloat(selectedFood[1]);
-            $('#sum_kcal').text((sum_kcal - selectedFoodKcal).toFixed(1) + 'kcal');
+            $('#sum_kcal').text((Math.round(sum_kcal - selectedFoodKcal)) + 'kcal');
 
             let sum_carbo = parseFloat($(`#sum_carbo`).text());
             let selectedFoodCarbo = parseFloat(selectedFood[2]);
-            $('#sum_carbo').text((sum_carbo - selectedFoodCarbo).toFixed(1) + 'g');
+            $('#sum_carbo').text((Math.round(sum_carbo - selectedFoodCarbo)) + 'g');
 
             let sum_pro = parseFloat($(`#sum_pro`).text());
             let selectedFoodPro = parseFloat(selectedFood[3]);
-            $('#sum_pro').text((sum_pro - selectedFoodPro).toFixed(1) + 'g');
+            $('#sum_pro').text((Math.round(sum_pro - selectedFoodPro)) + 'g');
 
             let sum_fat = parseFloat($(`#sum_fat`).text());
             let selectedFoodFat = parseFloat(selectedFood[4]);
-            $('#sum_fat').text((sum_fat - selectedFoodFat).toFixed(1) + 'g');
+            $('#sum_fat').text((Math.round(sum_fat - selectedFoodFat)) + 'g');
         }
         selectedFoodList = [];
 

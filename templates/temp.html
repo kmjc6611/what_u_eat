@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영수증 확인 폼</title>
+</head>
+
+<style>
+    h4 {
+        font-weight: 900;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 5px;
+    }
+
+    .moveNumber {
+        text-align: center;
+        width: 40px;
+    }
+
+    #NB {
+        color: rgb(122, 109, 109);
+    }
+
+</style>
+
+<body>
+<form name="form1">
+    <div>
+        <h4>영수증 확인을 위해 아래의 정보를 정확히 입력해 주시기 바랍니다.</h4>
+
+        <div>
+            <table>
+                <tr>
+                    <th>
+                        <!--라디오버튼-->
+                        <input type="radio" name="receipt" value="user_cash" onclick="div_OnOff('0');">
+                        구매자명 + 금액
+                        <input type="radio" name="receipt" value="email" onclick="div_OnOff('1');"> 이메일
+                        <input type="radio" name="receipt" value="card" onclick="div_OnOff('2');"> 카드번호
+                    </th>
+                </tr>
+            </table>
+        </div>
+
+        <div id="first" style="display:none">
+            <table>
+                <tr>
+                    <th> 구매자명</th>
+                    <th><input type="text" name="username"><br></th>
+                </tr>
+                <tr>
+                    <th> 결제금액</th>
+                    <th><input type="text" name="payment"><br></th>
+                </tr>
+            </table>
+        </div>
+
+        <div id="second" style="display:none">
+            <table>
+                <tr>
+                    <th> 이메일</th>
+                    <th><input type="text" name="username"><br></th>
+                </tr>
+
+            </table>
+        </div>
+
+        <div id="third" style="display:none">
+            <table>
+                <tr>
+                    <th> 카드번호</th>
+                    <th>
+                        <input type="text" class="moveNumber" onKeyup="inputMoveNumber(this);" maxlength="4"/>&nbsp;-&nbsp;
+
+                        <input type="text" class="moveNumber" onKeyup="inputMoveNumber(this);" maxlength="4"/>&nbsp;-&nbsp;
+
+                        <input type="text" class="moveNumber" onKeyup="inputMoveNumber(this);" maxlength="4"/>&nbsp;-&nbsp;
+
+                        <input type="text" class="moveNumber" onKeyup="inputMoveNumber(this);" maxlength="4"/>
+                    </th>
+                </tr>
+            </table>
+        </div>
+
+        <br>
+        <br>
+
+        <button type="button">입력</button>
+
+        <div id="NB">
+            <h5>[참고사항] <br>
+                구매자명과 금액은 결제결과 안내 메일에 기재된 내역 기준으로 입력하시기 바랍니다.</h5>
+        </div>
+
+    </div>
+</form>
+
+<script>
+
+    //카드번호함수
+    function inputMoveNumber(num) {
+
+        if (isFinite(num.value) == false) {     //숫자가 아닌 다른 문자가 입력될때
+            alert("카드번호는 숫자만 입력할 수 있습니다.");
+            num.value = "";
+            return false;
+        }
+
+        max = num.getAttribute("maxlength");
+
+        if (num.value.length >= max) {  //자동칸바꿈
+            num.nextElementSibling.focus();
+        }
+    }
+
+    function div_OnOff(selectList) {
+        var obj1 = document.getElementById("first"); // 상품1 리스트
+        var obj2 = document.getElementById("second"); // 상품2 리스트
+        var obj3 = document.getElementById("second"); // 상품2 리스트
+
+        if (selectList == "0") { // 상품1 리스트
+            obj1.style.display = "block";
+            obj2.style.display = "none";
+            alert(obj.style.display);
+        } else { // 상품2 리스트
+            obj1.style.display = "none";
+            obj2.style.display = "block";
+        }
+    }
+
+</script>
+</body>
+
+</html>
